@@ -13,10 +13,7 @@ namespace MoogleEngine
         Dictionary<string, string> documents;
         Terms terms;
         string[] queryTerms;
-<<<<<<< HEAD
         List<(char operador, int termIndex)> queryOperator;
-=======
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
         float[,] tfidfMatrix;
         #endregion
 
@@ -44,7 +41,6 @@ namespace MoogleEngine
         #endregion
 
         #region Search
-<<<<<<< HEAD
         
         // Metodo que devuelve los resultados del query
         public SearchItem[] VectorialModel(string query, out string suggestion)
@@ -81,16 +77,6 @@ namespace MoogleEngine
             // Se calcula el score a traves de la similitud de coseno y se obtiene el resultado de la busqueda
             float[] cosineSimilarity = CosineSimilarity(tfidfMatrix, queryVector);
             TitleCoincidence(cosineSimilarity);
-=======
-        // Metodo que devuelve los resultados del query
-        public SearchItem[] VectorialModel(string query)
-        {
-            // Se obtienen el vector de la quers, sus palabras normalizadas
-            float[] queryVector = terms.GetQueryVector(query, out queryTerms);
-
-            // Se calcula el score a traves de la similitud de coseno y se obtiene el resultado de la busqueda
-            float[] cosineSimilarity = CosineSimilarity(tfidfMatrix, queryVector);
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
             SearchItem[] queryDocumentsResult = QueryDocumentsResult();
 
             // Se ordena en orden descente el resultado de la busqueda y se devuelve
@@ -102,19 +88,11 @@ namespace MoogleEngine
             {
                 // Crear un array temporal para los resultados de la busqueda
                 SearchItem[] tempResult = new SearchItem[documents.Count];
-<<<<<<< HEAD
              
-=======
-
-                // Obtener los snpitted de todos los documentos con respecto al query
-                string[] snippets = GetSnippets();
-
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
                 // Iterar por los documentos 
                 int indexResult = 0, indexDocument = 0;
                 foreach (var title in documents.Keys)
                 {
-<<<<<<< HEAD
                     
                     // Verificar los operadores y el score: no se devolveran los documentos con score 0
                     if (cosineSimilarity[indexDocument] != 0 && !CheckExclusion(title, excludedTerms) && CheckInclusion(title, includedTerms))
@@ -131,12 +109,6 @@ namespace MoogleEngine
                         tempResult[indexResult++] = new SearchItem(title, snippet, score);
                     }
                                             
-=======
-                    // Verificar el snippet y el score: no se devolveran los documentos con score 0 y que su spippet sea null
-                    if (!string.IsNullOrEmpty(snippets[indexDocument]) && cosineSimilarity[indexDocument] != 0)
-                        tempResult[indexResult++] = new SearchItem(title, snippets[indexDocument], cosineSimilarity[indexDocument]);
-
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
                     indexDocument++;
                 }
 
@@ -156,18 +128,12 @@ namespace MoogleEngine
 
             // Calcular la similutd de coseno
             float[] vectorSimilitud = new float[documents.Count];
-<<<<<<< HEAD
             if (normaQuery != 0)
             {
                 for (int i = 0; i < documents.Count; i++)
                 {
                     vectorSimilitud[i] = vectorResultante[i] / (normaMatrix[i] * normaQuery);
                 } 
-=======
-            for (int i = 0; i < documents.Count; i++)
-            {
-                vectorSimilitud[i] = vectorResultante[i] / (normaMatrix[i] * normaQuery);
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
             }
 
             return vectorSimilitud;
@@ -194,7 +160,6 @@ namespace MoogleEngine
 
         #region Snippet
 
-<<<<<<< HEAD
         private string GetSnippet(string title, int indexDocument, string[] signifivativeTerms, (string, string)[] closerTerms, out float plusScore)
         {
             // Inicializar el pluScore 
@@ -243,28 +208,6 @@ namespace MoogleEngine
 
             //----------------------------------------------------------------------------------------------------------//
 
-=======
-        // Metodo general
-        private string[] GetSnippets()
-        {
-            // Crear una variable donde guardar los snippets 
-            string[] snippets = new string[documents.Count];
-
-            // Iterar por los documentos obtieniendo el snippet correspondiente
-            int index = 0;
-            foreach (var title in documents.Keys)
-            {
-                snippets[index] = SnippetScore(title, documents[title], index);
-                index++;
-            }
-
-            return snippets;
-        }
-
-        // Metodo que devuelve el snippet de un documento con mayor score
-        private string SnippetScore(string title, string text, int indexDocument)
-        {
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
             /* Diccionario que trendra como
                 - Key: las posiociones de un termino de la query
                 - Value: el tfidf del respectivo termino  */
@@ -275,7 +218,6 @@ namespace MoogleEngine
                 - Value: el numero de veces que aparece el termino en el snippet  */
             Dictionary<float, int> queryTFIDFValues = new Dictionary<float, int>();
 
-<<<<<<< HEAD
             /* Lista que contiene las el tfidf de las palbras de los operadores '*' y '^' */
             List<float> relevantTermsList = new List<float>();
 
@@ -286,18 +228,12 @@ namespace MoogleEngine
                 if (terms.GetTermIndex(queryTerms[i]) == -1)
                     continue;
 
-=======
-            // Iterar por los terminos de la query para rellenar los diccionario
-            for (int i = 0; i < queryTerms.Length; i++)
-            {
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
                 // Obtener el TF-IDF del termino y agregarlo al diccionario
                 float tfidfValue = tfidfMatrix[indexDocument, terms.GetTermIndex(queryTerms[i])];
 
                 if (tfidfValue == 0)
                     continue;
 
-<<<<<<< HEAD
                 // Verificar si en el diccionario hay un tfidf igual al actual
                 while (!queryTFIDFValues.TryAdd(tfidfValue, 0))
                     tfidfValue = MathF.BitDecrement(tfidfValue);
@@ -310,9 +246,6 @@ namespace MoogleEngine
                     relevantTermsList.Add(tfidfValue);
                     relevantIndex++;
                 }
-=======
-                queryTFIDFValues.Add(tfidfValue, 0);
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
 
                 // Obtener las posiciones de los terminos de la query en el documento y los agrega al diccionario  
                 int[] positions = terms.GetPositions(title, queryTerms[i]);
@@ -322,22 +255,10 @@ namespace MoogleEngine
                 }
             }
 
-<<<<<<< HEAD
             //----------------------------------------------------------------------------------------------------------//
 
             // Crear un array con las posiciones de los terminos ordenadas
             int[] queryPositionsSorted = (from position in queryPositions.Keys orderby position select position).ToArray();           
-=======
-            // Caso especifico cuando en el documento no aparece ningun termino de la query
-            if (queryPositions.Count == 0)
-                return "";
-
-            // Crear un array con las posiciones de los terminos ordenadas
-            int[] queryPositionsSorted = (from position in queryPositions.Keys orderby position select position).ToArray();
-            
-            // Fijar el tamaño de caracteres que debe tener el snippet
-            int snippetlength = 200;
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
 
             // Crear una tupla que guader el snippet con mayor score junto con la poscion en donde empieza y termina
             (int start, int end, float score) snippet = (0, 0, 0);
@@ -351,25 +272,16 @@ namespace MoogleEngine
                 // Comprobar que las posciones sean menores que snippetlength
                 if (finalIndex == queryPositionsSorted.Length - 1 || queryPositionsSorted[finalIndex + 1] - queryPositionsSorted[startIndex] > snippetlength)
                 {
-<<<<<<< HEAD
                     // Crear un score temporal y una variable que lleva el numero de terminos que hay dentro del snippet
                     float scoreTemp = 0;
                     int queryCount = 0;
 
                     // Boleano para identaficar cuando dentro del snippet aparece una palabra con operador
                     bool relavant = relevantTermsList.Count == 0;
-=======
-                    // Crear un score temporal
-                    float scoreTemp = 0;
-
-                    // Declarar una variable que lleva el numero de terminos que hay dentro del snippet 
-                    int queryCount = 0;
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
 
                     // Iterar por el diccionario para calcular el score temporal
                     foreach (var key in queryTFIDFValues.Keys)
                     {
-<<<<<<< HEAD
                         queryCount += ((queryTFIDFValues[key] > 0) ? 1 : 0);
                         scoreTemp += key * queryTFIDFValues[key];
 
@@ -380,15 +292,6 @@ namespace MoogleEngine
                     }
 
                     scoreTemp *= MathF.Pow(queryCount, (relavant) ? 5 : 2);
-=======
-                        queryCount += (queryTFIDFValues[key] > 0) ? 1 : 0;
-                        scoreTemp += key * queryTFIDFValues[key];
-
-                        queryTFIDFValues[key] = 0;
-                    }
-
-                    scoreTemp *= queryCount * queryCount;
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
 
                     // Comprobrar si el score temporal es mayor que el actual
                     if (scoreTemp > snippet.score)
@@ -399,20 +302,11 @@ namespace MoogleEngine
 
             }
 
-<<<<<<< HEAD
             return GetSnippetFromDocument(documents[title], snippet.start, snippet.end);
 
         }
 
         private string GetSnippetFromDocument(string text, int start, int end)
-=======
-            return GetSnippetFromDocument(text, snippet.start, snippet.end);
-
-        }
-
-        // Metodo que obtiene el snippet del documento
-        private static string GetSnippetFromDocument(string text, int start, int end)
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
         {
             // Declarar dos boolenos para controlar cuando termina la linea
             bool notStartLine = true, notEndLine = true;
@@ -447,16 +341,12 @@ namespace MoogleEngine
                 snippet.Append(text[i]);
             }
 
-<<<<<<< HEAD
             //return BoldWords(snippet.ToString());
-=======
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
             return snippet.ToString();
 
         }
 
         #endregion
-<<<<<<< HEAD
 
         #region Check Operators
 
@@ -616,7 +506,3 @@ namespace MoogleEngine
     }
 }
 
-=======
-    }
-}
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5

@@ -13,13 +13,8 @@ namespace MoogleEngine
         // Una matrix de tipo float que guardara el TF-IDF
         float[,] tfidfMatrix;
 
-<<<<<<< HEAD
         // Numero de palabras normalizadas (sin repetir) que tienen en general los documentos
         int normalizedTermsCount;       
-=======
-        // Lista que guardara las palabras normalizados de todos los documentos (sin repetir)
-        List<string> termsNormalized;
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
 
         /* Diccionario que tiene como
            - Key: los nombres de los documentos .txt
@@ -28,13 +23,8 @@ namespace MoogleEngine
 
         /* Diccionario que tiene como
            - Key: las palabras normalizados de todos los documentos (sin repetir)
-<<<<<<< HEAD
            - Value: el numero de documentos donde aparece la palabra y el indece que tiene la palabra dentro del diccionario  */
         Dictionary<string, (int frecuency, int index)> termsFrequencyPerDocument;
-=======
-           - Value: el numero de documentos donde aparece la palabra  */
-        Dictionary<string, int> termsFrequencyPerDocument;
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
 
         /* Diccionario que tiene como
            - Key: los nombres de los documentos .txt
@@ -56,26 +46,16 @@ namespace MoogleEngine
         {
             // Initialize the dictionaries
             this.documents = documents;
-<<<<<<< HEAD
             normalizedTermsCount = 0;
             termsLineAndFrequency = new Dictionary<string, Dictionary<string, List<int>>>(); // Position 0: line | Position 1: frequency
             termsFrequencyPerDocument = new Dictionary<string, (int frecuency, int index)>();
-=======
-            termsNormalized = new List<string>();
-            termsLineAndFrequency = new Dictionary<string, Dictionary<string, List<int>>>(); // Position 0: line | Position 1: frequency
-            termsFrequencyPerDocument = new Dictionary<string, int>();
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
             maxTermsFrequencyOfEachDocument = new Dictionary<string, int>();
 
             // Get their keys and Values
             NormalizeAndFrequency();
 
             // Calculate the TF-IDF Matrix
-<<<<<<< HEAD
             tfidfMatrix = new float[documents.Count, termsFrequencyPerDocument.Count];
-=======
-            tfidfMatrix = new float[documents.Count, termsNormalized.Count];
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
             CalculeteTFIDFMatrix();
 
         }
@@ -102,20 +82,10 @@ namespace MoogleEngine
                     maxTermsFrequencyOfEachDocument.Remove(title);
                 }
             }
-<<<<<<< HEAD
         }
 
         // Metodo que normaliza y obtiene las diferentes frecuencias de un documento
         private Dictionary<string, List<int>> Normalizer(string text, bool isQuery = false, List<(char operador, int termIndex)> queryOperator = null)
-=======
-
-            // Obtener las palabras normalizadas
-            termsNormalized = termsFrequencyPerDocument.Keys.ToList();
-        }
-
-        // Metodo que normaliza y obtiene las diferentes frecuencias de un documento
-        private Dictionary<string, List<int>> Normalizer(string text)
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
         {
             // Crear el diccionario que sera devuelto por el metodo
             Dictionary<string, List<int>> terms = new Dictionary<string, List<int>>();
@@ -123,17 +93,13 @@ namespace MoogleEngine
             // Variable que guardara una palabra normalizada a medida que se procesa el texto
             StringBuilder actualWord = new StringBuilder();
 
-<<<<<<< HEAD
             // Variable que se sera utilizada cuando en la query aparezca el operador de cercania "~"
             bool isCloserOperator = false;
 
-=======
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
             // Iterar sobre la variable text y determinar si un caracter es una letra o un numero
             int i;
             for (i = 0; i < text.Length; i++)
             {
-<<<<<<< HEAD
                 if (!char.IsLetterOrDigit(text[i]))
                 {
                     // Comprobar si es un operador
@@ -151,11 +117,6 @@ namespace MoogleEngine
                         }
                     }
 
-=======
-                // 
-                if (!char.IsLetterOrDigit(text[i]))
-                {
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
                     Check(actualWord, i);
                     continue;
                 }
@@ -207,7 +168,6 @@ namespace MoogleEngine
                 string word = actualWord.ToString();
                 if (!string.IsNullOrWhiteSpace(word))
                 {
-<<<<<<< HEAD
                     if (!terms.ContainsKey(word)) // Para termsLineAndFrequency
                     {
                         terms.Add(word, new List<int>());
@@ -222,28 +182,10 @@ namespace MoogleEngine
                                 normalizedTermsCount++;
                             } 
                         }
-=======
-                    // Para termsLineAndFrequency
-                    if (!terms.ContainsKey(word))
-                    {
-                        terms.Add(word, new List<int>());
-
-                        // Para termsFrequencyPerDocument
-                        if (termsFrequencyPerDocument.ContainsKey(word))
-                        {
-                            termsFrequencyPerDocument[word]++;
-                        }
-                        else
-                        {
-                            termsFrequencyPerDocument.Add(word, 1);
-                        }
-
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
                     }
 
                     terms[word].Add(i);
 
-<<<<<<< HEAD
                     if (!isQuery && maxTermsFrequencyOfEachDocument.Values.Last() < terms[word].Count)  // Para maxTermsFrequencyOfEachDocument
                         maxTermsFrequencyOfEachDocument[maxTermsFrequencyOfEachDocument.Keys.Last()] = terms[word].Count;
 
@@ -253,12 +195,6 @@ namespace MoogleEngine
                         isCloserOperator = false;
                     }
 
-=======
-                    // Para maxTermsFrequencyOfEachDocument
-                    if (maxTermsFrequencyOfEachDocument.Values.Last() < terms[word].Count)
-                        maxTermsFrequencyOfEachDocument[maxTermsFrequencyOfEachDocument.Keys.Last()] = terms[word].Count;
-
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
                     actualWord.Clear();
                 }
             }
@@ -272,14 +208,10 @@ namespace MoogleEngine
         // Devuelve el indice de una palabra que se encuentra en la lista termsNormalized
         public int GetTermIndex(string term)
         {
-<<<<<<< HEAD
             if (termsFrequencyPerDocument.ContainsKey(term))
                 return termsFrequencyPerDocument[term].index;
             else
                 return -1;
-=======
-            return termsNormalized.IndexOf(term);
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
         }
 
         // Devuelve la frecuencia de una palabra de un documento
@@ -316,17 +248,10 @@ namespace MoogleEngine
             int i = 0, j = 0;
             foreach (var title in documents.Keys)
             {
-<<<<<<< HEAD
                 foreach (var term in termsFrequencyPerDocument.Keys)
                 {
                     float num = ( GetFrequency(title, term) / (float) maxTermsFrequencyOfEachDocument[title]) * MathF.Log10( documents.Count / (float)  termsFrequencyPerDocument[term].frecuency);
 
-=======
-                foreach (var term in termsNormalized)
-                {
-                    float num = CalculateTF(GetFrequency(title, term), maxTermsFrequencyOfEachDocument[title]) * CalculateIDF(documents.Count, termsFrequencyPerDocument[term]);
-                    
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
                     tfidfMatrix[i, j] = num;
                     j++;
                 }
@@ -340,7 +265,6 @@ namespace MoogleEngine
         }
 
         // Devuelve el vector correspondiente a la query
-<<<<<<< HEAD
         public float[] GetQueryVector(string query, out string[] queryTerms, out List<(char operador, int termIndex)> queryOperator, out string suggestion)
         {
             // Crear una lista para guardar los operadore de la query con el indice de la palabra correspondiente
@@ -394,32 +318,11 @@ namespace MoogleEngine
             queryTerms = queryTermsList.Keys.ToArray();
             suggestion = (needForSuggestion) ? suggestionSB.ToString() : "";
 
-=======
-        public float[] GetQueryVector(string query, out string[] queryTerms)
-        {
-            // Crear una lista con las palabras normalizadas de la query y el vector correspondiente a la query relacionado con la matriz de TD-IDF
-            List<string> queryTermsList = Normalizer(query).Keys.ToList();
-            float[] queryVector = new float[termsNormalized.Count];
-
-            // Iterar por la lista para rellenar el vector de la query
-            int originalCount = queryTermsList.Count;
-            for (int i = 0; i < originalCount; i++)
-            {
-                if (termsNormalized.Contains(queryTermsList[i]))
-                    queryVector[termsNormalized.IndexOf(queryTermsList[i])]++;
-                else
-                    queryTermsList.RemoveAt(i); // Eliminar las palabras que no aparecen en ningun documento
-            }
-
-            // Devolver el vector de la query y sus palabras normalizadas
-            queryTerms = queryTermsList.ToArray();
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
             return queryVector;
         }
 
         #endregion
 
-<<<<<<< HEAD
         #region Sugerencia 
 
         // Obtener la sugerencia a traves de la distancia Levinshtein 
@@ -499,8 +402,5 @@ namespace MoogleEngine
             return Math.Min(delection, Math.Min(insertion, substition));
         }
         #endregion
-=======
-
->>>>>>> 244ec07cc3b173c9e78ff228fa8281a3ac3e73b5
     }
 }
