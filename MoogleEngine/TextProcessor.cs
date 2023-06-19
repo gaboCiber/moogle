@@ -48,6 +48,9 @@ namespace MoogleEngine
             // Se obtienen el vector de la quers, sus palabras normalizadas
             float[] queryVector = terms.GetQueryVector(query, out queryTerms, out queryOperator, out suggestion);
 
+            if (queryTerms.Length == 0)
+                return new SearchItem[0];
+
             // Crear los array con los terminos de los operadores
             string[] excludedTerms;
             string[] includedTerms;
