@@ -1,0 +1,368 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage[left=2.5cm, right=2.5cm, top=3cm, bottom=3cm]{geometry}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    {\includegraphics*[width=0.2\textwidth]{../Presentacion/fotos/matcom.jpg} \par}
+    \vspace*{1cm}
+    {\bfseries\LARGE Universidad de La Habana \par}
+    \vspace*{1cm}
+    {\scshape\Large Facultad de Matemática y Computación \par}
+    \vspace*{3cm}
+    {\scshape\Huge Informe del proyecto Moogle \par}
+    \vfill
+    {\Large Autor: \par}
+    {\Large Gabriel Andrés Pla Lasa \par} 
+    \vspace*{2cm}
+    {\small 1er año de Ciencia de la Computación}
+    \vfill
+\end{titlepage}
+
+\section*{Introducción} 
+
+En el presente informe se detallará la realización del “Moogle”, una aplicación web de búsqueda
+matricial.
+
+Esta aplicación buscará palabras o frases dentro de un contenedor que tiene una serie de
+documentos con extensión txt, y como resultado devolverá los documentos contengas esas palabras
+o frases. Para la optimización de la búsqueda se nos sugiere una serie de funcionalidades como por
+ejemplos: la utilización de modelos vectoriales, la introducción de operadores de consulta, etc.
+
+Con este objetivo en mente, mi aplicación procesará los documentos antes de iniciar, es decir, que
+se calculará previamente una serie de valores necesarios e imprescindibles para la búsqueda. De esta
+tarea se encarga la clase Terms. Una clase que obtendrá una lista general de todas las palabras de los
+documentos, la cual se transformará en una matriz de TF-IDF (Term Frequency – Inverse Document
+Frequency).
+
+Para la búsqueda realizada por un usuario (query) se dispone de una clase TextProcessor, la cual
+calculara un score por cada documento, donde ese score es la similitud que posee la query con un
+documento determinado. Y al final se devolverá como resultado de la búsqueda los documentos mas
+relevantes para la query.
+
+\section*{Inicio del programa} 
+
+Para que el programa procese todos los documentos .txt, que hay en la carpeta “Content”, antes que
+la aplicación inicie, en la clase \textit{MoogleServer.Program} se inicializara una variable estática llamada
+\textbf{textProcesor} que pertenece a la clase \textit{MoogleEngine.TextProcessor} y está declarada como campo de
+la clase \textit{MoogleEngine.Moogle}.
+
+\begin{figure}[h]
+    \includegraphics*[width=16cm]{fotos/01 - Inicio de la aplicacion.png}
+\end{figure}
+
+\section*{Constructor de la clase TextProcessor}
+
+Cuando la variable \textbf{textProcesor} se inicialice, el constructor de la clase 
+\textit{MoogleEngine.TextProcessor} procesara los documentos .txt, que hay en la carpeta “Content”, 
+siguiendo los siguientes pasos:
+
+\begin{enumerate}
+    \item Se guardará en una variable llamada \textbf{path} la ruta absoluta de la carpeta “Content”.
+    \item Se obtendrán los nombres de los documentos .txt que haya en las carpetas y posibles subcarpetas, 
+    y se guardarán en un array de strings.
+    \item Se inicializará el campo de la clase \textit{TextProcessor} de tipo \textit{Dictionary} 
+    llamado \textbf{documents} y se guardarán los nombres de los documentos .txt sin extensión 
+    de archivo (key) con su correspondiente texto (value).
+    \item Se inicializará el campo de la clase \textit{TextProcessor} de tipo \textit{Terms} llamado \textbf{terms} 
+    y se le pasará como parámetro al constructor el diccionario documents. En esta clase se obtendrán las
+    palabras normalizadas y la matriz de TF-IDF.
+    \item Se obtendrá la matriz de TF-IDF de tipo float[,] a través del método
+    \textit{MoogleEngine.Terms.GetTFIDFMatrix()} y se guardara en el campo \textbf{tfidfMatrix} de la clase
+    \textit{MoogleEngine.TextProcessor}.
+
+\end{enumerate}
+
+\begin{figure}[h]
+    \includegraphics*[width=16cm]{fotos/02 - Constructor de la TextProcessor.png}
+\end{figure}
+
+\section*{Clase Terms}
+
+En esta clase se obtendrán las palabras normalizadas y la matriz de TF-IDF. El TF-IDF de una palabra
+se calcula a través de la siguientes formulas:
+
+\begin{equation}
+    tf(t,d) = \frac{f(t,d)}{max(f(d))}
+\end{equation}
+
+\begin{equation}
+    idf(t,D) = \log\frac{D}{D(t)}
+\end{equation}
+
+\begin{equation}
+    tfidf(t,d,D) = tf(t,d) \cdot idf(t.D)
+\end{equation}
+
+donde:
+\begin{itemize}
+    \item f (t,d): frecuencia de la palabra t en el documento d 
+    \item max(f(d)): máxima frecuencia de una palabra en el documento d
+    \item D: número de documentos de la colección 
+    \item D(t): número de documentos donde aparece la palabra t
+\end{itemize}
+
+\newpage
+
+Y con el objetivo de obtener los valores que permitirán calcular la matrix de TF-IDF, se declararon
+una serie de campos en la clase \textit{Terms}:
+
+\begin{figure}[h]
+    \includegraphics*[width=16cm]{fotos/03 - Campos de la clase Terms.png}
+\end{figure}
+
+En el constructor de la clase se inicializaran todos estos campos y se llamará al método de instancia
+\textit{NormalizeAndFrequency()}, en el cual iterará por cada documento, con el objetivo de obtener los key
+y values de los diccionarios. Por cada iteración, se añadirá a \textbf{maxTermsFrequencyOfEachDocument}
+como KeyValuePair el título del documento y un 0. También, se llamara al método Normalizer() el
+cual devolverá el value del diccionario \textbf{termsLineAndFrequency}. Además, se chequeará cuando un
+documento está vacío, que en caso de cumplirse se eliminará el documento de los diccionarios que
+lo tengan como valor, y así los valores de la matriz de TF-IDF, que se computarán más tarde, no serán
+afectados innecesariamente. Por último, se obtendrán los términos normalizados de la key de
+\textbf{termsFrequencyPerDocument}.
+
+\begin{figure}[h]
+    \includegraphics*[width=16cm]{fotos/04 - NormaliceAndFrequency.png}
+\end{figure}
+
+\newpage
+
+El método \textit{Normalizer()}, tiene como objetivo: crear una colección de palabras normalizadas y a su vez
+computar la diferentes frecuencias reflejadas en los diccionarios declarados como campos. Para ello
+se pasará como parámetro del método el texto de un documento. Y dentro de él se declarará una
+variable de tipo \textit{Dictionary} llamada \textbf{terms} que será devuelto al final de la ejecución del método. Y
+también hay declarada una variable de tipo \textit{StringBuilder} denominada \textbf{actualWord}.
+
+En este método \textit{Normalizer()} se iterará por cada carácter del texto y se comprobará si es de tipo letra
+o número. En caso afirmativo se normalizará, es decir, en caso que lo necesite se convertirá en
+minúscula y se eliminará cualquier tipo de acento; y por último se añadirá a la variable \textbf{actualWord}
+a través del método \textit{Append()}. En caso contrario se llamará a una función local llamada \textit{Check()}, al
+cual se le pasaran como parámetros la variable \textbf{actualWord} y la posición en el texto (que será el
+número de iteración actual).
+
+En el \textit{Check()}, \textbf{actualWord} se convertirá a string y se efectuaran las siguientes operaciones
+condicionales:
+
+\begin{enumerate}
+    \item Se comprobará que \textbf{word} no sea un string nulo o vacío.
+    \item Luego se chequeará si el diccionario terms tiene un key igual al \textbf{word} y se añadirá a la lista, que posee
+    como value, la posición en el texto.
+    \item En caso que \textbf{terms} no tenga ningún key al igual a \textbf{word} , se verificará que \textbf{termsFrequencyPerDocument}
+    lo tenga como key también, y se le adicionará 1 a su valor de frecuencia. Además, es necesario
+    resaltar que \textbf{termsFrequencyPerDocument} tendrá como llave las palabras normalizadas de los
+    documentos (en general), es decir, será las columnas de la matriz de TF-IDF.
+    \item Finalmente se comprobará el diccionario \textbf{maxTermsFrequencyOfEachDocument}, es decir si es
+    menor el value actual de \textbf{maxTermsFrequencyOfEachDocument} comparado con la frecuencia
+    en que aparece una palabra en un documento.
+\end{enumerate}
+
+Además, al método \textit{Normalizer()}, se la pasaran dos parámetros opcionales, los cuales serán utilizados
+durante la query y harán que el método cambio un poco su comportamiento.
+
+Luego de finalizar el método \textit{NormalizeAndFrequency()} y haberse obtenido los respectivos key y
+values de todos los diccionarios, en el constructor de la clase Terms se prosigue, finalmente, a calcular
+la matriz de TF-IDF a través del método \textit{CalculeteTFIDFMatrix()}. En este método se iterará por los
+documentos (filas) y las palabras normalizadas (columnas), para obtener el TF-IDF del elemento
+correspondiente de la matriz \textbf{tfidfMatrix}, utilizando las fórmulas expuestas anteriormente con los
+valores de los diccionarios. Y así, finaliza la ejecución del constructor.
+
+Además, en esta clase \textit{Terms}, se tienen diferentes métodos que devuelven los valores de los campos
+y un método llamado \textit{GetQueryVector()}, el cual será explicado junto con la query.
+
+Y de esta forma, se termina de procesar los documentos .txt, la aplicación inicia y está a disposición
+de las búsquedas que haga el usuario.
+
+\begin{figure}[h]
+    \includegraphics*[width=16cm]{fotos/05 - Metodos Getter de Terms.png}
+\end{figure}
+
+\section*{La Query y la clase TextProcessor}
+
+Cuando el usuario hace la búsqueda se lanza el método \textit{Query()} de la clase \textit{MoogleEngine.Moogle}, en
+la cual, esta declarada una variable de tipo \textit{SearchItem[]} llamado \textbf{ítems}. Esta variable obtiene su valor
+(el resultado de la búsqueda) a través de un método de instancia denominado \textit{VectorialModel()}
+perteneciente al objeto \textbf{textProcesor}, el cual fue inicializado al empezar la aplicación.
+
+Al método \textit{VectorialModel()} se le pasa como parámetro un string \textbf{query} con la búsqueda realizada
+por el usuario y un parámetro out con la sugerencia. En este método, primeramente, se obtienen los
+valores de los campos \textbf{queryVector} y \textbf{queryTerms} de la clase \textit{TextProcessor}, a traves al método
+GetQueryVector() de la clase \textit{Terms}. Es decir, en este método se devuelve el vector, que contiene los
+TF de la query, y las palabras normalizadas de la query que aparezcan en al menos un documento,
+utilizando de por medio el método \textit{Normalizer()} ante descrito, pero ahora cuando en la query
+aparezca cietos caracteres, denominados operadores, se adicionaran junto con el índice del término
+al que modifican a una lista denominda \textbf{queryOperator}. Estos operadores van modificar como se realiza la búsqueda, es decir:
+\begin{itemize}
+    \item El operador “ * ”: aumenta la importancia que tiene una palabra en la búsqueda.
+    \item El operador “ ! ”: indica que la palabra a la que modifica no debe aparecer en los resultados de
+    la búsqueda. 
+    \item El operador “ \textasciicircum \space ": indica que la palabra a la que modifica siempre debe aparecer en los resultados
+    de la búsqueda.
+    \item El operador “ \textasciitilde \space ”: indica que las dos palabras a sus extremos deben aparecen los más cercanos
+    posibles en los resultados de la búsqueda.   
+\end{itemize}
+
+Además, en caso que no aparezca una palabra de la query en ninguno de los documentos, se buscará
+dentro del universo de palabras (\textbf{termsFrequencyPerDocument}), la palabra más parecida. Para esto,
+se utilizará la distancia de Levinshtein, un algoritmo que buscará el menor número de operaciones
+requeridas para transformar una palabra en la otra. Luego, esta nueva palabra será sustituida en el
+texto de la query y será enviada al usuario como una sugerencia de búsqueda.
+
+\newpage
+
+Luego en el método \textit{VectorialModel()} se crearan una serie de variables de tipo string[], en el cual en
+cada uno de ellos se guardaran las palabras relacionadas con algún tipo de operador. Esta operación
+se hará a través del método \textit{GetOperatorTerms()} de la clase \textit{TextProcessor}, y para ello se utilizara la
+variable \textbf{queryOperator}, para crear los respectivos arrays de cada operador. Además, se le
+aumentaran el tf a las palabras relacionadas con los operadores de importancia (“ * ”) y de cercanía
+(“ \textasciitilde \space ”) en el array \textbf{queryVector}.
+
+Después, se llama al método \textit{CosineSimilarity()}, al cual se le pasan dos parámetros: los campos
+\textbf{tfidfMatrix} y \textbf{queryVector}. Para luego efectuarse una serie de cálculos:
+
+\begin{enumerate}
+    \item Se multiplicaran la matriz \textbf{tfidfMatrix} con el vector \textbf{queryVector} (considerado como una matriz
+    columna) utilizando el método estático \textit{Multiplication()} de la clase \textit{Matrix}. En este método
+    primero se comprueba que haya tantas columnas en la matriz como filas en el vector (matriz
+    columna). Y por último se multiplican dando como resultado un vector (matriz columna). La
+    multiplicación está dada por la formula: $\sum_{k = 0}^{p} M_{ik} \cdot V_{kp}$ , donde: $M_{ik}$, $V_{kp}$, i, p
+    representan respectivamente a un elemento de la matriz, un elemento del vector, las filas y
+    las columnas. Estos valores se guardan en un array llamado \textbf{vectorResultante}.
+    \item Se obtiene la norma tanto de la matriz \textbf{tfidfMatrix} como la del vector \textbf{queryVector}, que en este
+    caso se considerara como una matriz fila. Estas dos normas se calculan por un método estático
+    llamado \textit{Norma()}, uno declarado en la clase \textit{Matrix} y otro en la clase \textit{Vector}. La norma de una
+    matriz fila puede calcularse como: $\sqrt{\sum_{k = 0}^{p} a_k}$ , donde: p son las columnas y $a_k$ un elemento de la matriz fila. Por tanto, al final se obtendrán un vector (matriz columna) por parte de
+    tfidfMatrix llamado normaMatrix y un número por parte queryVector denominado \textbf{normaQuery}.
+    \item Por último el método \textit{VectorialModel()} devuelve un array (vector) con la similitud de coseno,
+    la cual se calcula dividiendo cada elemento del \textbf{vectorResultante} por la multiplicación de la
+    \textbf{normaQuery} con el correspondiente elemente en \textbf{normaMatrix}. 
+\end{enumerate}
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm]{fotos/06 - Similud de coseno.png}
+\end{figure}
+
+Después de finalizar el método \textit{CosineSimilarity()} se obtiene un número (score) por cada documento
+entre 0 y 1, el cual representa a medida que se acerque a 1 cuan relevante es ese documento con
+respecto a la búsqueda realizada por el usuario.
+
+Entonces, para poder mostrarle al usuario los resultados de su búsqueda, esta definida una clase
+llamada \textit{SearchItem}, en donde se relacionan los documentos con su respectivo score y una parte del
+documento donde aparece la query (snippet). Por tanto, en el método \textit{VectorialModel()} hay
+declarada un array de tipo \textit{SearchItem}, llamada \textbf{queryDocumentsResult} el cual será devuelto al
+finalizar la ejecución del método. La variable \textbf{queryDocumentsResult} obtiene su valor, es decir, los
+resultados de la búsqueda, a través de la función local \textit{QueryDocumentsResult()}. En este función se
+crea una variable temporal \textbf{tempResult} del tipo \textit{SearchItem[]} para guardar los resultados de la
+búsqueda.
+
+En este método se iterará por los documentos relacionándolos con su respectivo score y snippet en
+la variable \textbf{tempResult}. Los documentos que tengan score 0 y no cumplan con los requisitos del
+operador de inclusión y exclusión  no se añadirán al \textbf{tempResult}, puesto que no aportan
+nada a los resultados de los query. Y al final quedaran en \textbf{tempResult} solo los documentos relevantes,
+los cuales serán devueltos al finalizar \textit{QueryDocumentsResult()}.
+
+El snippet, no es más que, una parte del documento donde aparece el contenido de query. Y el
+método \textit{GetSnippet()} es el que se encarga de realizar esta operación.
+
+Primeramente, dentro de este método, se verificara que no haya ningún par de palabra que sean
+modificadas por el operador de cercanía. En caso afirmativo, se iterara por las posiciones de
+las palabras dentro del documento, que serán obtenidas a través del método \textit{GetPositions()} de la
+clase \textit{Terms}. Y se buscara la porción del texto en donde esas palabras estén más cercas.
+
+Además, el score del documetno va a ser ahora la diferencia entre las dos posiciones más cercanas
+entre 200 (longitud máxima que puede haber entre dos posiciones) por el score del documento
+obtenido por el método \textit{CosineSimilarity()}.
+
+En caso contrario, para obtener un snippet de un documento, se calculará primero el score de los
+posibles snippets que haya dentro del documento y se devolverá el mayor. Para calcular el score de
+un posible snippet se multiplicará el número de palabras diferentes de la query que aparecen en el
+snippet por la sumatoria de los valores de TF-IDF de todas las palabras de la query que están en el
+snippet. Además, si alguna palabra de la query está relacionada con los operadores de importancia e
+inclusión el score será duplicado.
+
+Por lo tanto, dentro del método SnippetScore() se disponen de dos diccionarios: \textbf{queryPositions},
+donde se relaciona una lista de posiciones de una palabra de la query con su TF-IDF; y
+queryTFIDFValues en el cual el TF-IDF de las palabras de la query se vincula con el número de veces
+que aparece una palabra en un posible snippet. Las palabras de la query con su TF-IDF se obtienen a
+través de los campos \textbf{queryTerms} y \textbf{tfidfMatrix} de la clase \textit{TextProcessor} y su lista de posiciones
+dentro de un documento por el método \textit{GetPositions()} de la clase \textit{Terms}. Luego, para calcular los
+scores de los posibles snippets, se iterará por un array ordenado, que tiene todas las posiciones de
+las palabras de la query de un documento, donde la distancia que haya entre dos posiciones
+diferentes deberá ser menor de 200 caracteres.
+
+El \textit{SnippetScore()} para finalizar llamará a \textit{GetSnippetFromDocument()}, un método que dado el texto
+de un documento y la posición inicial y final del snippet con mayor score, iterara hasta encontrar el
+principio y el final de la línea donde esta la palabra de la query en la posición inicial y final
+respectivamente, y devolverá el texto comprendido entre ellos.
+
+Por último, antes de finalizar el método \textit{VectorialModel()} y delvolver el valor \textbf{queryDocumentsResult},
+los resultados de la búsqueda se ordenaran de manera descendente, utilizando el algoritmo de
+Selection Sort.
+
+\newpage
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm]{fotos/07 - VectorialModel.png}
+\end{figure}
+
+\section*{Resultados de búsqueda}
+
+A continuación, se mostrarán ejemplos de una posible búsqueda y la utilización de los operadores.
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm, height=8cm]{fotos/08 - Resultados (1).png}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm, height=8cm]{fotos/09 - Resultados (2).png}
+\end{figure}
+
+\medskip
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm, height=8cm]{fotos/10 - Resultados (3).png}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm, height=8cm]{fotos/11 - Resultados (4).png}
+\end{figure}
+
+\medskip
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm, height=8cm]{fotos/12 - Resultados (5).png}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm, height=8cm]{fotos/13 - Resultados (6).png}
+\end{figure}
+
+\medskip
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm, height=8cm]{fotos/14 - Resultados (7).png}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm, height=8cm]{fotos/15 - Resultados (8).png}
+\end{figure}
+
+\medskip
+
+\begin{figure}[h]
+    \includegraphics*[width=15cm, height=8cm]{fotos/16 - Resultados (9).png}
+\end{figure}
+
+\end{document}
